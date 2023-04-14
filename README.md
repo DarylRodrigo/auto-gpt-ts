@@ -1,6 +1,6 @@
-# auto-gpt-ts
+# Autonomous GPT
 
-### Gettings started
+### Getting started
 
 1. Install the package
 
