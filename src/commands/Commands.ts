@@ -1,16 +1,16 @@
-import { Record, String, Array, Static, Null, Boolean } from "runtypes";
+import { Record, String, Array, Static, Null, Boolean } from 'runtypes';
 
 export const CommandPayload = Record({
   name: String,
   args: Array(String),
-})
-export type CommandPayload = Static<typeof CommandPayload>
+});
+export type CommandPayload = Static<typeof CommandPayload>;
 
 export const CommandResult = Record({
   ok: Boolean,
   message: String.Or(Null),
-})
-export type CommandResult = Static<typeof CommandResult>
+});
+export type CommandResult = Static<typeof CommandResult>;
 
 export abstract class Commands {
   constructor(

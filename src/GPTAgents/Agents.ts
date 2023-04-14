@@ -1,44 +1,43 @@
-import { AgentConfig } from "../Agent";
-import { Record, String, Static } from "runtypes";
-import { CommandPayload, Commands } from "../commands";
-import OpenAi from "../utils/OpenAI";
+import { AgentConfig } from '../Agent';
+import { Record, String, Static } from 'runtypes';
+import { CommandPayload, Commands } from '../commands';
+import OpenAi from '../utils/OpenAI';
 
 export const CorrectionFormat = Record({
   command: CommandPayload,
-  error: String
-})
-export type CorrectionFormat = Static<typeof CorrectionFormat>
-
+  error: String,
+});
+export type CorrectionFormat = Static<typeof CorrectionFormat>;
 
 export class CorrectCommandAgent {
-  private openAi: OpenAi
+  private openAi: OpenAi;
 
-  constructor (private config: AgentConfig) {
+  constructor(private config: AgentConfig) {
     this.openAi = new OpenAi(this.config.openAIApiKey);
   }
 
-  async execute(incorrectCommand: unknown, commands: Commands[] ): Promise<CorrectionFormat> {
-    const response = await this.openAi.chatCompletion([ 
+  async execute(incorrectCommand: unknown, commands: Commands[]): Promise<CorrectionFormat> {
+    const response = await this.openAi.chatCompletion([
       {
-        role: 'system', 
-        content: this.generatePrompt(incorrectCommand, commands)
-      }, 
+        role: 'system',
+        content: this.generatePrompt(incorrectCommand, commands),
+      },
       {
-        role: 'user', 
-        content: `Determine the correct command format, and respond using the format specified above:` 
-      }
-    ])
+        role: 'user',
+        content: `Determine the correct command format, and respond using the format specified above:`,
+      },
+    ]);
 
     try {
-      const res = CorrectionFormat.check(JSON.parse(response))
-      return res
-    } catch(err) {
-      throw new Error('Error parsing agent response')
+      const res = CorrectionFormat.check(JSON.parse(response));
+      return res;
+    } catch (err) {
+      throw new Error('Error parsing agent response');
     }
   }
 
   private generatePrompt(incorrectCommand: unknown, commands: Commands[]) {
-      return `
+    return `
       You are an expert analytics and coding program designed to figure out problems with json responses.
 
       OBJECTIVES:
@@ -49,14 +48,12 @@ export class CorrectCommandAgent {
 
 
       VALID COMMAND FORMATS
-      ${
-        commands.map( (command) => {
-          return `{
+      ${commands.map((command) => {
+        return `{
             "name": "${command.name}",
             "args": [${command.format}]
-          }`
-        } )
-      }
+          }`;
+      })}
       - { "name": REMOVE_DIR, args: ["arg_name_of_directory"] }
       - { "name": CREATE_DIR, args: ["arg_name_of_directory"] }
       - { "name": CHANGE_DIR, args: ["arg_name_of_directory"] }
@@ -68,7 +65,7 @@ export class CorrectCommandAgent {
 
       INCORRECT COMMAND
 
-      ${ JSON.stringify(incorrectCommand) }
+      ${JSON.stringify(incorrectCommand)}
 
 
       CORRECT COMMNAD FORMAT
@@ -87,6 +84,6 @@ export class CorrectCommandAgent {
         },
         "error": "short description of what the problem was"
       }
-    `
+    `;
   }
 }

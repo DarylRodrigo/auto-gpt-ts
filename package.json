@@ -5,20 +5,26 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node src/main.ts"
+    "start": "ts-node src/main.ts",
+    "build": "tsc && npm run format",
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.2",
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "got": "^12.6.0",
     "openai": "^3.2.1",
     "prompt-sync": "^4.2.0",
     "runtypes": "^6.6.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@types/node": "^18.15.11"
+    "@types/node": "^18.15.11",
+    "@types/uuid": "^9.0.1",
+    "prettier": "^2.8.7"
   }
 }

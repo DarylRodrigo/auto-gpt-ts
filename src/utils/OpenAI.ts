@@ -47,7 +47,10 @@ class OpenAi {
       temperature: 0.7,
     };
 
-    const response = await this.axiosInstance.post<ChatCompletionResponse>('chat/completions', request);
+    const response = await this.axiosInstance.post<ChatCompletionResponse>(
+      'chat/completions',
+      request,
+    );
 
     return response.data.choices[0].message.content;
   }

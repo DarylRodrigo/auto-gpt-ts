@@ -1,9 +1,9 @@
 export const generateGuidingPrompt = (
   directive: string,
   goals: string[],
-  commandListInstructions: string[]
-  ): string => {
-    const prompt = `
+  commandListInstructions: string[],
+): string => {
+  const prompt = `
 ROLE:
 ${directive}
 
@@ -50,6 +50,6 @@ Response format:
       }
     ]
 }
-    `
-      return prompt
-  }
+    `;
+  return prompt;
+};
