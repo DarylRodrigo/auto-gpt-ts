@@ -1,5 +1,7 @@
 # .gitignore for Node.js application
 
+.env
+
 # Logs
 logs
 *.log
