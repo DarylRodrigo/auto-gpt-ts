@@ -27,16 +27,10 @@ export interface AgentConfig {
   agentId: string,
   directive: string,
   goals: string[],
-  apiKeys: {
-    openAi: string;
-  }
 }
 
 export class Agent {
   private guidingPrompt: string = '';
-  // private correctCommandAgent: CorrectCommandAgent;
-  
-
   constructor(
     private config: AgentConfig,
     private commandBus: CommandBus,
@@ -48,8 +42,6 @@ export class Agent {
       this.config.goals,
       this.commandBus.generateCommandList(),
     );
-    // this.correctCommandAgent = new CorrectCommandAgent(config);
-    
 
     console.log(this.guidingPrompt)
   }

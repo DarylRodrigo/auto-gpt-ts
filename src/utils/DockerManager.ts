@@ -54,7 +54,6 @@ export class DockerManager {
   
             stdoutStream.on('end', () => {
               const message = new TextDecoder('utf-8').decode(Buffer.from(output, 'binary'));
-              console.log(message);
               resolve(message);
             });
           })
