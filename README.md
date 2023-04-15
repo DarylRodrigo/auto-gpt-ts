@@ -14,7 +14,13 @@ npm install
 - Rename it to .env
 - Fill in the values
 
-3. Run the example
+3. Start Docker
+
+```bash
+npm run docker-compose
+```
+
+4. Run the example
 
 ```bash
 ts-node src/main.ts
