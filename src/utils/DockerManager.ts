@@ -18,7 +18,6 @@ export class DockerManager {
   }
 
   containerExec(cmd: string[]) {
-    console.log(cmd)
     return new Promise<string>((resolve, reject) => {
       if (!this.container) {
         return reject(new Error('Container is not initialized'))

@@ -11,6 +11,13 @@ describe('dockerCommandHandler', () => {
 
   beforeEach( async () => {
     await dockerManager.setup()
+    
+  })
+
+  afterEach( async () => {
+    await commandBus.execute("REMOVE_DIR", ["testDir"])
+    await commandBus.execute("DELETE_FILE", ["*.txt"])
+    await commandBus.execute("DELETE_FILE", ["*.py"])
   })
   
   it("should list files", async () => {
@@ -70,12 +77,12 @@ describe('dockerCommandHandler', () => {
 
     const res = await commandBus.execute("APPEND_FILE", ["testFileToAppend.txt", ", World!"]);
 
-    const { message: content} = await commandBus.execute("READ_FILE", ["testFileToRead.txt"]);
+    const { message: content} = await commandBus.execute("READ_FILE", ["testFileToAppend.txt"]);
     expect(content).to.include("World!"); 
     expect(res.ok).eql(true);
   });
 
-  it.only("should run python", async () => {
+  it("should run python", async () => {
     await commandBus.execute("DELETE_FILE", ["hello.py"]);
     await commandBus.execute("WRITE_TO_FILE", ["hello.py", `print ("Hello World!")`]);
     

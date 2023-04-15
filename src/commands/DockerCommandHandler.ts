@@ -31,7 +31,7 @@ export class DockerCommandHandler {
 
   async deleteFile(args: string[]): Promise<CommandResult> {
     const [fileName] = args;
-    const res = await this.dockerManager.containerExec(["rm", fileName]);
+    const res = await this.dockerManager.containerExec(["sh", "-c", `rm ${fileName}`]);
     return { ok: true, message: res };
   }
 
