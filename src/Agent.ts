@@ -1,11 +1,11 @@
 import { Record, Static, String, Array } from 'runtypes';
-import { CommandPayload, Commands } from './commands';
 import { generateGuidingPrompt } from './config';
-import OpenAi from './utils/OpenAI';
+
 import { Memory } from './memory/Memory';
-import { CorrectCommandAgent } from './GPTAgents/Agents';
-import { v4 as uuid } from 'uuid'
+// import { CorrectCommandAgent } from './GPTAgents/Agents';
 import { CommandBus } from './infra/CommandBus';
+import { CommandPayload } from './infra/Commands';
+import OpenAiManager from './utils/OpenAIManager';
 const prompt = require('prompt-sync')();
 
 export const AgentThought = Record({
@@ -33,24 +33,23 @@ export interface AgentConfig {
 }
 
 export class Agent {
-  private agentId: string;
   private guidingPrompt: string = '';
-  private correctCommandAgent: CorrectCommandAgent;
-  private openai: OpenAi;
+  // private correctCommandAgent: CorrectCommandAgent;
+  
 
   constructor(
     private config: AgentConfig,
     private commandBus: CommandBus,
-    private memory: Memory = new Memory(),
+    private openai: OpenAiManager,
+    private memory: Memory
   ) {
     this.guidingPrompt = generateGuidingPrompt(
       this.config.directive,
       this.config.goals,
       this.commandBus.generateCommandList(),
     );
-    this.correctCommandAgent = new CorrectCommandAgent(config);
-    this.openai = new OpenAi(this.config.apiKeys.openAi);
-    this.agentId = uuid()
+    // this.correctCommandAgent = new CorrectCommandAgent(config);
+    
 
     console.log(this.guidingPrompt)
   }
@@ -109,7 +108,7 @@ export class Agent {
     }
   }
 
-  async act(thought: AgentThought, commandPayloads: CommandPayload[]) {
+  async act(thoughts: AgentThought, commandPayloads: CommandPayload[]) {
     const commandHistory = [];
 
     for (const commandPayload of commandPayloads) {
@@ -120,7 +119,7 @@ export class Agent {
       commandHistory.push({ command: commandPayload, commandResult });
     }
 
-    this.memory.addMemoryBlock({ thought, actions: commandHistory });
+    this.memory.addMemoryBlock({ thoughts, actions: commandHistory });
 
     console.log(this.memory.shortTermMemory);
   }

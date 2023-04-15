@@ -1,16 +1,19 @@
 import { Agent, AgentConfig } from './Agent';
-import { makeWorkspace } from './utils/helper';
 import { DockerManager } from './utils/DockerManager';
 import dotenv from 'dotenv';
 import { CommandBus } from './infra/CommandBus';
 import { DockerCommandHandler } from './commands/DockerCommandHandler';
+import OpenAiManager from './utils/OpenAIManager';
+import { v4 as uuid } from 'uuid'
+import Logger from './utils/Logger';
+import { Memory } from './memory/Memory';
 
 dotenv.config();
 
 
 const main = async () => {
   const agentConfig: AgentConfig = {
-    agentId: 'test-123',
+    agentId: uuid(),
     directive: 'You are a AGI programming machine',
     goals: [
       '- Make a calculator app in python, that can add, subtract, multiply, and divide',
@@ -21,18 +24,28 @@ const main = async () => {
       openAi: process.env.OPENAI_API_KEY as string,
     }
   }
+
+  // Set up logging
+  const logger = new Logger(agentConfig.agentId);
   
+  // Setup docker interface as sandbox for agent
   const dockerManager = new DockerManager()
   await dockerManager.setup()
 
+  // Create command bus and register commands
   const commandBus = new CommandBus()
   const dockerCommandHandler = new DockerCommandHandler(dockerManager)
   dockerCommandHandler.registerTo(commandBus)
 
-  const agent = new Agent(agentConfig, commandBus);  
+  // Create OpenAI manager
+  const openAiManager = new OpenAiManager(agentConfig.apiKeys.openAi);
 
-  // makeWorkspace();
-  // agent.run(5);
+  // Instantiate agent
+  const memory = new Memory(logger)
+  const agent = new Agent(agentConfig, commandBus, openAiManager, memory)
+
+  // Run agent
+  agent.run(5);
 };
 
 main();

@@ -1,21 +1,9 @@
-import { Record, Array, Static } from 'runtypes';
-import { AgentThought } from '../Agent';
-import { CommandPayload, CommandResult } from '../infra/Commands';
-
-const MemoryBlock = Record({
-  thoughts: AgentThought,
-  actions: Array(
-    Record({
-      command: CommandPayload,
-      commandResult: CommandResult,
-    }),
-  ),
-});
-type MemoryBlock = Static<typeof MemoryBlock>;
+import Logger from "../utils/Logger";
+import { MemoryBlock } from "../infra/Memories";
 
 export class Memory {
   private memory: MemoryBlock[] = [];
-  constructor() {}
+  constructor(private logger: Logger) {}
 
   get shortTermMemory(): string {
     const memory = this.memory.map((block) => {
@@ -35,12 +23,13 @@ export class Memory {
 
     return memory
       .map((block) => {
-        return `plan: ${block.plan}, reasoning: ${block.reasoning}, commands: ${block.command}`;
+        return `plan: ${block.plan}, reasoning: ${block.reasoning}, commands: ${block.command}`
       })
-      .join('\n');
+      .join('\n')
   }
 
   addMemoryBlock(memoryBlock: MemoryBlock) {
-    this.memory.push(memoryBlock);
+    this.memory.push(memoryBlock)
+    this.logger.saveThought(memoryBlock)
   }
 }

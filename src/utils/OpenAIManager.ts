@@ -27,7 +27,7 @@ interface ChatCompletionResponse {
   }>;
 }
 
-class OpenAi {
+class OpenAiManager {
   private axiosInstance: AxiosInstance;
 
   constructor(apiKey: string) {
@@ -56,4 +56,4 @@ class OpenAi {
   }
 }
 
-export default OpenAi;
+export default OpenAiManager;

@@ -1,6 +1,6 @@
 import { AgentConfig } from '../Agent';
 import { Record, String, Static } from 'runtypes';
-import OpenAi from '../utils/OpenAI';
+import OpenAi from '../utils/OpenAIManager';
 import { CommandPayload, Commands } from '../infra/Commands';
 
 export const CorrectionFormat = Record({
