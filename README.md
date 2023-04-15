@@ -8,7 +8,7 @@
 npm install
 ```
 
-2. Create a `.env` file in the root directory and add the following
+2. Setup environment variables
 
 - Copy paste the .env.example file 
 - Rename it to .env
