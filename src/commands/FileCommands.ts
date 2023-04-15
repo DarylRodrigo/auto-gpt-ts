@@ -1,4 +1,4 @@
-import { Commands } from './Commands';
+import { Commands } from '../infra/Commands';
 import { GenerateBashCommand } from './helpers/GenerateBashCommand';
 
 class ChangeDirectoryCommand extends Commands {

@@ -1,4 +1,4 @@
-import { Commands } from '../Commands';
+import { Commands } from '../../infra/Commands';
 import { Record, String, Static, Null, Array } from 'runtypes';
 import { promisify } from 'util';
 import { exec } from 'child_process';
