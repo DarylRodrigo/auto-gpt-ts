@@ -1,9 +1,9 @@
 import { Record, Array, Static } from 'runtypes';
 import { AgentThought } from '../Agent';
-import { CommandPayload, CommandResult } from '../commands';
+import { CommandPayload, CommandResult } from '../infra/Commands';
 
 const MemoryBlock = Record({
-  thought: AgentThought,
+  thoughts: AgentThought,
   actions: Array(
     Record({
       command: CommandPayload,
@@ -20,8 +20,8 @@ export class Memory {
   get shortTermMemory(): string {
     const memory = this.memory.map((block) => {
       return {
-        plan: block.thought.plan.join(' -> '),
-        reasoning: block.thought.reasoning,
+        plan: block.thoughts.plan.join(' -> '),
+        reasoning: block.thoughts.reasoning,
         command: block.actions
           .map(
             (action) =>

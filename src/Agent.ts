@@ -5,6 +5,7 @@ import OpenAi from './utils/OpenAI';
 import { Memory } from './memory/Memory';
 import { CorrectCommandAgent } from './GPTAgents/Agents';
 import { v4 as uuid } from 'uuid'
+import { CommandBus } from './infra/CommandBus';
 const prompt = require('prompt-sync')();
 
 export const AgentThought = Record({
@@ -23,7 +24,12 @@ export const AgentResponse = Record({
 export type AgentResponse = Static<typeof AgentResponse>;
 
 export interface AgentConfig {
-  openAIApiKey: string;
+  agentId: string,
+  directive: string,
+  goals: string[],
+  apiKeys: {
+    openAi: string;
+  }
 }
 
 export class Agent {
@@ -33,31 +39,20 @@ export class Agent {
   private openai: OpenAi;
 
   constructor(
-    public name: string,
-    public directive: string,
-    public goals: string[],
     private config: AgentConfig,
-    public commands: any = {},
+    private commandBus: CommandBus,
     private memory: Memory = new Memory(),
   ) {
     this.guidingPrompt = generateGuidingPrompt(
-      this.directive,
-      this.goals,
-      this.generateCommandList(),
+      this.config.directive,
+      this.config.goals,
+      this.commandBus.generateCommandList(),
     );
     this.correctCommandAgent = new CorrectCommandAgent(config);
-    this.openai = new OpenAi(this.config.openAIApiKey);
+    this.openai = new OpenAi(this.config.apiKeys.openAi);
     this.agentId = uuid()
-  }
 
-  registerCommand(command: Commands) {
-    this.commands[command.name] = command;
-    this.guidingPrompt = generateGuidingPrompt(
-      this.directive,
-      this.goals,
-      this.generateCommandList(),
-    );
-    console.log(this.guidingPrompt);
+    console.log(this.guidingPrompt)
   }
 
   async run(numLoops = 10, options = { permissions: true }) {
@@ -97,9 +92,10 @@ export class Agent {
           return commandPayload as CommandPayload;
         }
 
-        console.log(`Incorrect command format: ${commandPayload}`);
-        const corrections = await this.correctCommandAgent.execute(commandPayload, this.commands);
-        return corrections.command;
+        // console.log(`Incorrect command format: ${commandPayload}`);
+        // const corrections = await this.correctCommandAgent.execute(commandPayload, this.commands);
+        // return corrections.command;
+        return commandPayload as CommandPayload;
       });
 
       // Return thoughts and corrected commands
@@ -118,11 +114,9 @@ export class Agent {
 
     for (const commandPayload of commandPayloads) {
       const { name: commandName, args } = commandPayload;
+      
       console.log(`executing command: ${commandName} with args: ${args}`);
-
-      const cmd = this.commands[commandName];
-      const commandResult = await cmd.execute({ args });
-
+      const commandResult = await this.commandBus.execute(commandName, args);
       commandHistory.push({ command: commandPayload, commandResult });
     }
 
@@ -131,9 +125,4 @@ export class Agent {
     console.log(this.memory.shortTermMemory);
   }
 
-  private generateCommandList() {
-    return Object.keys(this.commands).map((command) => {
-      return this.commands[command].generateInstruction();
-    });
-  }
 }

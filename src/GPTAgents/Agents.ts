@@ -1,7 +1,7 @@
 import { AgentConfig } from '../Agent';
 import { Record, String, Static } from 'runtypes';
-import { CommandPayload, Commands } from '../commands';
 import OpenAi from '../utils/OpenAI';
+import { CommandPayload, Commands } from '../infra/Commands';
 
 export const CorrectionFormat = Record({
   command: CommandPayload,
@@ -13,7 +13,7 @@ export class CorrectCommandAgent {
   private openAi: OpenAi;
 
   constructor(private config: AgentConfig) {
-    this.openAi = new OpenAi(this.config.openAIApiKey);
+    this.openAi = new OpenAi(this.config.apiKeys.openAi);
   }
 
   async execute(incorrectCommand: unknown, commands: Commands[]): Promise<CorrectionFormat> {

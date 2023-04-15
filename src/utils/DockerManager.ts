@@ -1,5 +1,7 @@
-import Docker from 'dockerode';
-import { Duplex } from 'stream';
+import Docker from 'dockerode'
+import { Duplex } from 'stream'
+import { TextDecoder } from 'text-encoding-utf-8'
+
 
 
 export class DockerManager {
@@ -11,10 +13,12 @@ export class DockerManager {
   }
 
   async setup() {
+    if (this.container) { return }
     this.container = await this.connectToPythonContainer(this.containerName)
   }
 
   containerExec(cmd: string[]) {
+    console.log(cmd)
     return new Promise<string>((resolve, reject) => {
       if (!this.container) {
         return reject(new Error('Container is not initialized'))
@@ -50,8 +54,10 @@ export class DockerManager {
             });
   
             stdoutStream.on('end', () => {
-              resolve(output)
-            })
+              const message = new TextDecoder('utf-8').decode(Buffer.from(output, 'binary'));
+              console.log(message);
+              resolve(message);
+            });
           })
         }
       )
