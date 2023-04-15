@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  auto-gpt-ts:
+    depends_on:
+      - auto-gpt-ts-redis
+    build: ./
+    volumes:
+      - "./autogptts:/app"
+      - ".env:/app/.env"
+    profiles: ["exclude-from-up"]
+
+  auto-gpt-ts-redis:
+    image: redis:6.2.6-alpine
+    container_name: auto-gpt-ts-redis
+    command: redis-server --requirepass redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - auto-gpt-ts-redis-data:/data
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: redis
+      REDIS_REPLICATION_MODE: master
+
+volumes:
+  auto-gpt-ts-redis-data:

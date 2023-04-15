@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node src/main.ts",
     "build": "tsc && npm run format",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "docker-compose": "docker-compose pull && docker-compose up -d"
   },
   "author": "",
   "license": "ISC",
