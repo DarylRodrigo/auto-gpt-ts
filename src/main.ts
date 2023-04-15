@@ -42,6 +42,7 @@ const main = async () => {
 
   const dockerCommandHandler = new DockerCommandHandler(dockerManager)
   dockerCommandHandler.registerTo(commandBus)
+
   const researchCommandHandler = new ResearchCommandHandler({ 
     googleApiKey: options.googleApiKey, 
     googleSearchEngineId: options.googleSearchEngineId, 

@@ -1,6 +1,7 @@
 import { DockerManager } from './utils/DockerManager';
-import dotenv from 'dotenv';
+import { WebSummariser } from './commands/utils/WebSummariser';
 import { CommandBus } from './infra/CommandBus';
+import dotenv from 'dotenv';
 import { DockerCommandHandler } from './commands/DockerCommandHandler';
 import { ResearchCommandHandler } from './commands/ResearchCommandHandler';
 
@@ -32,8 +33,11 @@ const main = async () => {
     wolframAlphaAppId: options.wolframAlphaAppId 
   })
   researchCommandHandler.registerTo(commandBus)
-  const res = await commandBus.execute("SEARCH_GOOGLE", ["Who was Nikola Tesla?"])
+  const res = await commandBus.execute("SUMMARIES_WEBSITE", ['https://en.wikipedia.org/wiki/Nikola_Tesla', 'Who was Nikola Tesla?'])
   console.log(res)
+
+  const ws = new WebSummariser()
+  console.log(await ws.getSummary('https://en.wikipedia.org/wiki/Nikola_Tesla', ""))
 };
 
 main();

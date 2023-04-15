@@ -1,3 +1,4 @@
+import axios from "axios";
 import { CommandBus } from "../infra/CommandBus";
 import { CommandResult } from "../infra/Commands";
 import { GoogleSearch } from "./utils/GoogleSearch";
@@ -13,7 +14,7 @@ export class ResearchCommandHandler {
   private googleSearch: GoogleSearch;
   private wolframAlpha: WolframAlpha;
 
-  constructor(options: ResearchCommandHandlerOptions) {
+  constructor(private options: ResearchCommandHandlerOptions) {
     this.googleSearch = new GoogleSearch(options.googleApiKey, options.googleSearchEngineId);
     this.wolframAlpha = new WolframAlpha(options.wolframAlphaAppId);
   }
@@ -30,19 +31,41 @@ export class ResearchCommandHandler {
     return { ok: true, message: res };
   }
 
+  async summaries(args: string[]): Promise<CommandResult> {
+    const [ url, question ] = args;
+
+    console.log(question)
+    const response = await axios.get(url);
+    console.log(response)
+
+    return { ok: true, message: "Not implemented" };
+  }
+
   registerTo(commandBus: CommandBus) {
-    commandBus.registerCommand(
-      "SEARCH_GOOGLE",
-      "Searches Google for the given query eg: ['Who was Nikola Tesla']",
-      "['search query']",
-      async (args) => await this.searchGoogle(args)
-    );
+
+    if (this.options.googleApiKey && this.options.googleSearchEngineId) {
+      commandBus.registerCommand(
+        "SEARCH_GOOGLE",
+        "Searches Google for the given query eg: ['Who was Nikola Tesla']",
+        "['search query']",
+        async (args) => await this.searchGoogle(args)
+      );  
+    }
+    
+    if (this.options.wolframAlphaAppId) {
+      commandBus.registerCommand(
+        "QUERY_WOLFRAM_ALPHA",
+        "Queries Wolfram Alpha for the given query eg: ['What is the capital of France?']",
+        "['query']",
+        async (args) => await this.queryWolframAlpha(args)
+      )
+    }
 
     commandBus.registerCommand(
-      "QUERY_WOLFRAM_ALPHA",
-      "Queries Wolfram Alpha for the given query eg: ['What is the capital of France?']",
-      "['query']",
-      async (args) => await this.queryWolframAlpha(args)
+      "SUMMARIES_WEBSITE",
+      "Summaries website and tries to answer question eg: ['https://en.wikipedia.org/wiki/Nikola_Tesla', 'Who was Nikola Tesla?']",
+      "['website_url', 'question to asnwer']",
+      async (args) => await this.summaries(args)
     );
   }
 }
