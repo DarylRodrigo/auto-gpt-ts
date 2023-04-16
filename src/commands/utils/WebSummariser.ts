@@ -4,6 +4,7 @@ import TurndownService from 'turndown';
 import * as natural from 'natural'
 import OpenAiManager from '../../utils/OpenAIManager';
 import { Record, Static, String, Number, Boolean } from 'runtypes';
+import wiki from 'wikijs';
 
 export const GptAnalysis = Record({
   quality: Number,
@@ -19,9 +20,15 @@ export class WebSummariser {
   }
 
   async getSummary(url: string, question: string): Promise<string[]> {
-    const content = (await this.getContentInMarkdown(url)).split("\n")
-    const filtered = content.filter((line) => line.length > 10 && !/^\s*[\[]/.test(line))
-    const segments = this.textTiling.textTiling(filtered.join(" "), 30, 5).filter( (segment) => segment.length > 10)
+    let segments: string[] = []
+    if (url.includes("wikipedia.org")) {
+      segments = await this.getWikipediaBlocks(url)
+    } else {
+      const content = await this.getContentInMarkdown(url)
+      const filtered = content.split("\n").filter((line) => line.length > 10 && !/^\s*[\[]/.test(line))
+      segments = this.textTiling.textTiling(filtered.join(" "), 30, 5).filter( (segment) => segment.length > 10)
+    }
+    
 
     const analysis = await Promise.all(segments.map((segment) => this.summariseBlock(segment, question)))
 
@@ -63,15 +70,11 @@ export class WebSummariser {
         
         ${question}
         
-        Please response with JSON
+        Please response with JSON ONLY no additional text
       `
     }
 
-    const completion = await this.openAiManager.chatCompletion([systemPrompt, userPromp])
-    console.log(completion)
-
-    const analysis = GptAnalysis.check(JSON.parse(completion));
-    return analysis
+    return await this.openAiManager.chatCompletion([systemPrompt, userPromp], GptAnalysis )
   }   
 
   async getContentInMarkdown (url: string): Promise<string> {
@@ -124,6 +127,39 @@ export class WebSummariser {
       console.error(`Error fetching and processing URL "${url}":`, error);
       throw error;
     }
+  }
+
+  async getWikipediaBlocks (url: string): Promise<string[]> {
+    interface IPage {
+      title: string;
+      content: string;
+      items?: IPage[];
+    }
+
+    // Get the page title from the URL and fetch the page content
+    const title = decodeURIComponent(url.split('/').pop() || '');
+    if (!title) {
+      throw new Error('Invalid URL format');
+    }
+    const page = await wiki().page(title);
+    const summary = await page.content() as unknown as IPage[]
+
+    // Filter out unwanted pages - they are just noise
+    const content = summary.filter((page) => !["External links", "Further reading", "Notes", "References", "See also"].includes(page.title))
+    
+    // Flatten the content into a single array of blocks
+    const blocks: string[] = []
+    content.forEach((page) => {
+      if (page.content.length === 0 && page.items) {
+        page.items.forEach((item) => {
+          blocks.push(`${page.title} : ${item.title} - ${item.content}`)
+        })
+      } else {
+        blocks.push(`${page.title} - ${page.content}`)
+      }
+    })
+
+    return blocks
   }
 }
 

@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { Runtype } from 'runtypes';
 
 interface ChatCompletionRequest {
   model: string;
@@ -40,19 +41,29 @@ class OpenAiManager {
     });
   }
 
-  async chatCompletion(messages: Array<{ role: string; content: string }>): Promise<string> {
-    const request: ChatCompletionRequest = {
-      model: 'gpt-3.5-turbo',
-      messages: messages,
-      temperature: 0.7,
-    };
+  async chatCompletion<T>(messages: Array<{ role: string; content: string }>, record: Runtype<T>) {
+    const RETRIES = 3
+    for (let i = 0 ; i < RETRIES ; i++) {
+      try {
+        const request: ChatCompletionRequest = {
+          model: 'gpt-3.5-turbo',
+          messages: messages,
+          temperature: 0.7,
+        };
+    
+        const completion = await this.axiosInstance.post<ChatCompletionResponse>(
+          'chat/completions',
+          request,
+        );
+        const content = completion.data.choices[0].message.content
+        return record.check(JSON.parse(content));
+      } catch (e) {
+        console.log("Failed to get valid JSON response from OpenAI - trying again...")
+      }
+    }
 
-    const response = await this.axiosInstance.post<ChatCompletionResponse>(
-      'chat/completions',
-      request,
-    );
-
-    return response.data.choices[0].message.content;
+    throw new Error("Failed to get valid JSON response from OpenAI")
+    
   }
 }
 

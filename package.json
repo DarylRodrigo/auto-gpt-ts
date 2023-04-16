@@ -37,7 +37,8 @@
     "ts-node": "^10.9.1",
     "turndown": "^7.1.2",
     "typescript": "^5.0.4",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "wikijs": "^6.4.1"
   },
   "devDependencies": {
     "@types/chai": "^4.3.4",

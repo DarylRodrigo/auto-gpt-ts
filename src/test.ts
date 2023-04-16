@@ -6,6 +6,8 @@ import { DockerCommandHandler } from './commands/DockerCommandHandler';
 import { ResearchCommandHandler } from './commands/ResearchCommandHandler';
 import OpenAIManager from './utils/OpenAIManager';
 
+
+
 dotenv.config();
 
 
@@ -39,18 +41,18 @@ const main = async () => {
   })
   researchCommandHandler.registerTo(commandBus)
 
-  const searchRes = await commandBus.execute("SEARCH_GOOGLE", ['top italian dishes'])
-  console.log(searchRes)
+  // const searchRes = await commandBus.execute("SEARCH_GOOGLE", ['top italian dishes'])
+  // console.log(searchRes)
 
   // const res = await commandBus.execute("SUMMARIES_WEBSITE", ['https://www.auburn.edu/~vestmon/robotics.html', 'What are the 3 laws of robotics?'])
   // console.log(res)
 
   const ws = new WebSummariser(openAiManager)
-  console.log(await ws.getSummary('https://www.chefspencil.com/top-25-most-popular-italian-foods-dishes', "top italian dishes?"))
+  // console.log(await ws.getSummary('https://www.chefspencil.com/top-25-most-popular-italian-foods-dishes', "top italian dishes?"))
   // console.log(await ws.getSummary('https://en.wikipedia.org/wiki/Nikola_Tesla', ""))
   
   // console.log(await ws.getSummary('https://www.auburn.edu/~vestmon/robotics.html', ""))
-  // console.log(await ws.getSummary('https://en.wikipedia.org/wiki/Three_Laws_of_Robotics', ""))
+  console.log(await ws.getSummary('https://en.wikipedia.org/wiki/Three_Laws_of_Robotics', "What are the three laws of robotics?"))
   // console.log(await ws.getSummary('https://www.britannica.com/topic/Three-Laws-of-Robotics', ""))
   // console.log(await ws.getSummary('https://theconversation.com/after-75-years-isaac-asimovs-three-laws-of-robotics-need-updating-74501', ""))
   // console.log(await ws.getSummary('https://www.theguardian.com/notesandqueries/query/0,5753,-21259,00.html', ""))
