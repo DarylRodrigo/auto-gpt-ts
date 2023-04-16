@@ -25,15 +25,12 @@ export class WebSummariser {
       segments = await this.getWikipediaBlocks(url)
     } else {
       const content = await this.getContentInMarkdown(url)
-      console.log(content)
       const filtered = content.split("\n").filter((line) => line.length > 10 && !/^\s*[\[]/.test(line))
-      console.log(filtered)
       segments = this.textTiling.textTiling(filtered.join(" "), 30, 5).filter( (segment) => segment.length > 10)
     }
     
 
     const analysis = await Promise.all(segments.map((segment) => this.summariseBlock(segment, question)))
-    console.log(analysis)
 
     return analysis
       .filter((a) => 
