@@ -55,8 +55,8 @@ export class Agent {
   };
 
   async think() {
-    console.log("============= T H I N K I N G=======================")
-    console.log("===> Memory")
+    console.log("============= 🧠 T H I N K I N G 🧠 =============")
+    console.log("===> Memories Added")
     console.log(this.memory.shortTermMemory)
 
     const { thoughts, commands } = await this.openai.chatCompletion([
@@ -75,9 +75,9 @@ export class Agent {
       }
     ], AgentResponse);
     
-    console.log("===> Thoughts")
+    console.log("===> Thoughts Returned")
     console.log(thoughts)
-    console.log("===> Commands")
+    console.log("===> Commands Returned")
     console.log(commands)
     
 

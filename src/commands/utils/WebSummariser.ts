@@ -25,17 +25,20 @@ export class WebSummariser {
       segments = await this.getWikipediaBlocks(url)
     } else {
       const content = await this.getContentInMarkdown(url)
+      console.log(content)
       const filtered = content.split("\n").filter((line) => line.length > 10 && !/^\s*[\[]/.test(line))
+      console.log(filtered)
       segments = this.textTiling.textTiling(filtered.join(" "), 30, 5).filter( (segment) => segment.length > 10)
     }
     
 
     const analysis = await Promise.all(segments.map((segment) => this.summariseBlock(segment, question)))
+    console.log(analysis)
 
     return analysis
       .filter((a) => 
-        a.questionAnswered && a.quality > 5 || 
-        !a.questionAnswered && a.quality > 7
+        a.questionAnswered && a.quality > 4 || 
+        !a.questionAnswered && a.quality > 5
       )
       .map((a) => a.summary)
   }
@@ -46,7 +49,7 @@ export class WebSummariser {
       role: "system",
       content: `
       You are an AGI design to summaries and analyse text and answer questions. 
-      If the question cannot be answered using the text please summarize the text. 
+      Please summaries the text in 2 or 3 sentences.
       Also calculate the quality from 0 to 10, quality means how helpful the text is in answering the question. 
       Use the questionAnswered to asses whether the question was answered.
 

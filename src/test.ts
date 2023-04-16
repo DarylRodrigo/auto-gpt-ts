@@ -44,11 +44,11 @@ const main = async () => {
   // const searchRes = await commandBus.execute("SEARCH_GOOGLE", ['top italian dishes'])
   // console.log(searchRes)
 
-  // const res = await commandBus.execute("SUMMARIES_WEBSITE", ['https://www.auburn.edu/~vestmon/robotics.html', 'What are the 3 laws of robotics?'])
+  // const res = await commandBus.execute("SUMMARIES_WEBSITE", ['https://www.countryliving.com/uk/travel-ideas/staycation-uk/a29510524/uk-holiday-destinations', 'What are the most popular UK summer holiday destinations?'])
   // console.log(res)
 
-  // const ws = new WebSummariser(openAiManager)
-  // console.log(await ws.getSummary('https://www.chefspencil.com/top-25-most-popular-italian-foods-dishes', "top italian dishes?"))
+  const ws = new WebSummariser(openAiManager)
+  console.log(await ws.getSummary('https://www.countryliving.com/uk/travel-ideas/staycation-uk/a29510524/uk-holiday-destinations', "What are the most popular UK summer holiday destinations?"))
   // console.log(await ws.getSummary('https://en.wikipedia.org/wiki/Nikola_Tesla', ""))
   // console.log(await ws.getSummary('https://www.auburn.edu/~vestmon/robotics.html', ""))
   // console.log(await ws.getSummary('https://en.wikipedia.org/wiki/Three_Laws_of_Robotics', "What are the three laws of robotics?"))
