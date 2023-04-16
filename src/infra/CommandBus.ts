@@ -17,8 +17,10 @@ export class CommandBus {
   }
 
   async execute(commandName: string, args: string[]) {
+    const now = new Date()
     const { cmd } = this.commands[commandName];
     const commandResult = await cmd(args) as CommandResult;
-    return commandResult
+    
+    return { ...commandResult, executedAt: `${now.toLocaleDateString()} ${now.toLocaleTimeString()}` }
   }
 }

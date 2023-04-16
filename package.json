@@ -8,7 +8,9 @@
     "build": "tsc && npm run format",
     "format": "prettier --write \"src/**/*.ts\"",
     "docker-compose": "docker-compose pull && docker-compose up -d",
-    "test": "mocha test"
+    "test": "mocha test",
+    "test-prompt": "ts-node scripts/testPrompt.ts",
+    "run-agent": "ts-node src/main.ts"
   },
   "author": "",
   "license": "ISC",

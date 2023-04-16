@@ -1,4 +1,4 @@
-import { Record, String, Array, Static, Null, Boolean } from 'runtypes';
+import { Record, String, Array, Static, Null, Boolean, Partial } from 'runtypes';
 
 export const CommandPayload = Record({
   name: String,
@@ -9,7 +9,11 @@ export type CommandPayload = Static<typeof CommandPayload>;
 export const CommandResult = Record({
   ok: Boolean,
   message: String.Or(Null),
-});
+}).And(
+  Partial({
+    executedAt: String,
+  })
+)
 export type CommandResult = Static<typeof CommandResult>;
 
 export abstract class Commands {

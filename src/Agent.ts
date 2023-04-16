@@ -49,15 +49,17 @@ export class Agent {
   async run(numLoops = 10, options = { permissions: true }) {
     for (let i = 0; i < numLoops; i++) {
       const { thoughts, commands } = await this.think();
-      console.log(thoughts)
-      console.log(commands)
       if (options.permissions && prompt('continue with action?') !== 'y') process.exit(-1);
       await this.act(thoughts, commands);
     }
   };
 
   async think() {
-    const completion = await this.openai.chatCompletion([
+    console.log("============= T H I N K I N G=======================")
+    console.log("===> Memory")
+    console.log(this.memory.shortTermMemory)
+
+    const { thoughts, commands } = await this.openai.chatCompletion([
       {
         role: 'system',
         content: this.guidingPrompt,
@@ -70,13 +72,16 @@ export class Agent {
         role: 'user',
         content:
           'Determine which next command to use, and respond using the format specified above:',
-      },
-    ]);
+      }
+    ], AgentResponse);
+    
+    console.log("===> Thoughts")
+    console.log(thoughts)
+    console.log("===> Commands")
+    console.log(commands)
+    
 
     try {
-      // Check response is in correct format
-      const { thoughts, commands } = AgentResponse.check(JSON.parse(completion));
-
       // Commands sometimes are not in the correctly interperated so have agent correct them.
       const promises = commands.map(async (commandPayload: unknown): Promise<CommandPayload> => {
         if (CommandPayload.validate(commandPayload).success) {
@@ -95,7 +100,6 @@ export class Agent {
         commands: await Promise.all(promises),
       };
     } catch (err) {
-      console.log(completion);
       throw new Error('Error parsing agent response');
     }
   }
@@ -111,7 +115,11 @@ export class Agent {
       commandHistory.push({ command: commandPayload, commandResult });
     }
 
-    this.memory.addMemoryBlock({ thoughts, actions: commandHistory });
+    // commit thoughts and commands to memory
+    this.memory.addMemoryBlock({ type: "THOUGHT", memory: { thoughts, actions: commandPayloads }})
+    commandHistory.forEach((command) => {
+      this.memory.addMemoryBlock({ type: "COMMAND", memory: command })
+    })
 
     console.log(this.memory.shortTermMemory);
   }

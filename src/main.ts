@@ -20,13 +20,23 @@ const main = async () => {
     wolframAlphaAppId: process.env.WOLFRAM_ALPHA_APP_ID as string,
   }
 
+  // const agentConfig: AgentConfig = {
+  //   agentId: uuid(),
+  //   directive: 'You are a AGI programming machine',
+  //   goals: [
+  //     '- Make a calculator app in python, that can add, subtract, multiply, and divide',
+  //     '- validate the program can run',
+  //     '- write tests to make sure it works',
+  //   ]
+  // }
+
   const agentConfig: AgentConfig = {
     agentId: uuid(),
-    directive: 'You are a AGI programming machine',
+    directive: 'You are a AGI research analyst designed to research information and synthesise it into a report',
     goals: [
-      '- Make a calculator app in python, that can add, subtract, multiply, and divide',
-      '- validate the program can run',
-      '- write tests to make sure it works',
+      '- research the most populat destinations for a holiday in the UK in summer',
+      '- generate a travel itenerary proposal',
+      '- save the plan in a text file',
     ]
   }
 
@@ -37,21 +47,24 @@ const main = async () => {
   const dockerManager = new DockerManager()
   await dockerManager.setup()
 
+  // Create OpenAI manager
+  const openAiManager = new OpenAiManager(options.openAiApiKey);
+
   // Create command bus and register commands
   const commandBus = new CommandBus()
 
   const dockerCommandHandler = new DockerCommandHandler(dockerManager)
   dockerCommandHandler.registerTo(commandBus)
 
-  const researchCommandHandler = new ResearchCommandHandler({ 
-    googleApiKey: options.googleApiKey, 
-    googleSearchEngineId: options.googleSearchEngineId, 
-    wolframAlphaAppId: options.wolframAlphaAppId 
-  })
+  const researchCommandHandler = new ResearchCommandHandler(
+    openAiManager, 
+    { 
+      googleApiKey: options.googleApiKey, 
+      googleSearchEngineId: options.googleSearchEngineId, 
+      wolframAlphaAppId: options.wolframAlphaAppId 
+    }
+  )
   researchCommandHandler.registerTo(commandBus)
-
-  // Create OpenAI manager
-  const openAiManager = new OpenAiManager(options.openAiApiKey);
 
   // Instantiate agent
   const memory = new Memory(logger)

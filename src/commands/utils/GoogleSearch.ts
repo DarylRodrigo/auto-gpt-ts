@@ -11,8 +11,8 @@ export class GoogleSearch {
 
   async search(query: string): Promise<string> {
     const url = `https://www.googleapis.com/customsearch/v1?key=${this.apiKey}&cx=${this.searchEngineId}&q=${encodeURIComponent(query)}`;
-    const response = await axios.get(url);
-    const items = response.data.items;
+    const response = await axios.get(url)
+    const items = response.data.items.slice(0, 3);
 
     if (items && items.length > 0) {
       return items.map((item: any) => `${item.title} snippet: ${item.snippet} - link: ${item.link}`).join("\n")

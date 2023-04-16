@@ -55,6 +55,8 @@ class OpenAiManager {
           'chat/completions',
           request,
         );
+
+        // Validate correct response format
         const content = completion.data.choices[0].message.content
         return record.check(JSON.parse(content));
       } catch (e) {

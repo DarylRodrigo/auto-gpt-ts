@@ -1,8 +1,9 @@
-import axios from "axios";
 import { CommandBus } from "../infra/CommandBus";
 import { CommandResult } from "../infra/Commands";
 import { GoogleSearch } from "./utils/GoogleSearch";
 import { WolframAlpha } from "./utils/WolframAlpha";
+import OpenAiManager from "../utils/OpenAIManager";
+import { WebSummariser } from "./utils/WebSummariser";
 
 export interface ResearchCommandHandlerOptions {
   googleApiKey: string;
@@ -11,12 +12,14 @@ export interface ResearchCommandHandlerOptions {
 }
 
 export class ResearchCommandHandler {
-  private googleSearch: GoogleSearch;
-  private wolframAlpha: WolframAlpha;
+  private googleSearch: GoogleSearch
+  private wolframAlpha: WolframAlpha
+  private webSummaries: WebSummariser
 
-  constructor(private options: ResearchCommandHandlerOptions) {
+  constructor(openAiManager: OpenAiManager, private options: ResearchCommandHandlerOptions) {
     this.googleSearch = new GoogleSearch(options.googleApiKey, options.googleSearchEngineId);
     this.wolframAlpha = new WolframAlpha(options.wolframAlphaAppId);
+    this.webSummaries = new WebSummariser(openAiManager)
   }
 
   async searchGoogle(args: string[]): Promise<CommandResult> {
@@ -34,11 +37,9 @@ export class ResearchCommandHandler {
   async summaries(args: string[]): Promise<CommandResult> {
     const [ url, question ] = args;
 
-    console.log(question)
-    const response = await axios.get(url);
-    console.log(response)
+    const summaries = await this.webSummaries.getSummary(url, question); 
 
-    return { ok: true, message: "Not implemented" };
+    return { ok: true, message: summaries.join("\n") };
   }
 
   registerTo(commandBus: CommandBus) {
@@ -46,7 +47,7 @@ export class ResearchCommandHandler {
     if (this.options.googleApiKey && this.options.googleSearchEngineId) {
       commandBus.registerCommand(
         "SEARCH_GOOGLE",
-        "Searches Google for the given query eg: ['Who was Nikola Tesla']",
+        "Searches Google for the given query eg: ['Who was Nikola Tesla'], returns links and snippets only",
         "['search query']",
         async (args) => await this.searchGoogle(args)
       );  
@@ -63,8 +64,8 @@ export class ResearchCommandHandler {
 
     commandBus.registerCommand(
       "SUMMARIES_WEBSITE",
-      "Summaries website and tries to answer question eg: ['https://en.wikipedia.org/wiki/Nikola_Tesla', 'Who was Nikola Tesla?']",
-      "['website_url', 'question to asnwer']",
+      "Researches a website and tries to answer question eg: ['https://en.wikipedia.org/wiki/Nikola_Tesla', 'Who was Nikola Tesla?']",
+      "['website_url', 'question to answer']",
       async (args) => await this.summaries(args)
     );
   }

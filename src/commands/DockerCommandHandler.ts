@@ -13,26 +13,26 @@ export class DockerCommandHandler {
 
   async makeDirectory(args: string[]): Promise<CommandResult> {
     const [directoryName] = args;
-    const res = await this.dockerManager.containerExec(["mkdir", directoryName]);
-    return { ok: true, message: res };
+    await this.dockerManager.containerExec(["mkdir", directoryName]);
+    return { ok: true, message: "succesfull" };
   }
 
   async removeDirectory(args: string[]): Promise<CommandResult> {
     const [directoryName] = args;
-    const res = await this.dockerManager.containerExec(["rm", "-r", directoryName]);
-    return { ok: true, message: res };
+    await this.dockerManager.containerExec(["rm", "-r", directoryName]);
+    return { ok: true, message: "succesfull" };
   }
 
   async makeFile(args: string[]): Promise<CommandResult> {
     const [fileName] = args;
-    const res = await this.dockerManager.containerExec(["touch", fileName]);
-    return { ok: true, message: res };
+    await this.dockerManager.containerExec(["touch", fileName]);
+    return { ok: true, message: "succesfull" };
   }
 
   async deleteFile(args: string[]): Promise<CommandResult> {
     const [fileName] = args;
-    const res = await this.dockerManager.containerExec(["sh", "-c", `rm ${fileName}`]);
-    return { ok: true, message: res };
+    await this.dockerManager.containerExec(["sh", "-c", `rm ${fileName}`]);
+    return { ok: true, message: "succesfull" };
   }
 
   async readFile(args: string[]): Promise<CommandResult> {
@@ -43,14 +43,14 @@ export class DockerCommandHandler {
 
   async writeToFile(args: string[]): Promise<CommandResult> {
     const [fileName, content] = args;
-    const res = await this.dockerManager.containerExec(["sh", "-c", `echo '${content}' > ${fileName}`]);
-    return { ok: true, message: res };
+    await this.dockerManager.containerExec(["sh", "-c", `echo '${content}' > ${fileName}`]);
+    return { ok: true, message: "succesfull" };
   }
 
   async appendToFile(args: string[]): Promise<CommandResult> {
     const [fileName, content] = args;
-    const res = await this.dockerManager.containerExec(["sh", "-c", `echo '${content}' >> ${fileName}`]);
-    return { ok: true, message: res };
+    await this.dockerManager.containerExec(["sh", "-c", `echo '${content}' >> ${fileName}`]);
+    return { ok: true, message: "succesfull" };
   }
 
   async listFiles(args: string[]): Promise<CommandResult> {
