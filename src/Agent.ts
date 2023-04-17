@@ -43,7 +43,9 @@ export class Agent {
       this.commandBus.generateCommandList(),
     );
 
-    console.log(this.guidingPrompt)
+    console.log(`✨ Directive: ${this.config.directive}`)
+    console.log(`\n🎯 Goals: \n${this.config.goals.map((goal) => `- ${goal}`).join('\n')}`)
+    console.log(`\n🛠 Registered Commands:\n${this.commandBus.generateCommandList().map(cmd => `-${cmd}`).join('\n')} \n\n`)
   }
 
   async run(numLoops = 10, options = { permissions: true }) {

@@ -2,6 +2,7 @@ import { expect } from "chai";
 import nock from "nock";
 import { CommandBus } from "../../src/infra/CommandBus";
 import { ResearchCommandHandler, ResearchCommandHandlerOptions } from "../../src/commands/ResearchCommandHandler";
+import OpenAiManager from "../../src/utils/OpenAIManager";
 
 describe("ResearchCommandHandler", () => {
   const options: ResearchCommandHandlerOptions = {
@@ -10,9 +11,11 @@ describe("ResearchCommandHandler", () => {
     wolframAlphaAppId: "fake_wolfram_alpha_app_id",
   };
 
-  const rsearchCommandHandler = new ResearchCommandHandler(options);
+  const openAiManager = new OpenAiManager("fake_open_ai_api_key");
+
+  const researchCommandHandler = new ResearchCommandHandler(openAiManager, options);
   const commandBus = new CommandBus();
-  rsearchCommandHandler.registerTo(commandBus);
+  researchCommandHandler.registerTo(commandBus);
 
   afterEach(() => {
     nock.cleanAll();

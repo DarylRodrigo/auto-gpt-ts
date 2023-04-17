@@ -1,10 +1,11 @@
 import { DockerManager } from './utils/DockerManager';
-import { WebSummariser } from './commands/utils/WebSummariser';
+// import { WebSummariser } from './commands/utils/WebSummariser';
 import { CommandBus } from './infra/CommandBus';
 import dotenv from 'dotenv';
 import { DockerCommandHandler } from './commands/DockerCommandHandler';
 import { ResearchCommandHandler } from './commands/ResearchCommandHandler';
 import OpenAIManager from './utils/OpenAIManager';
+import { CodeEditingCommandHandler } from './commands/CodeEditingCommandHandler';
 
 
 
@@ -41,14 +42,17 @@ const main = async () => {
   })
   researchCommandHandler.registerTo(commandBus)
 
+  const codeEditingCommandHandler = new CodeEditingCommandHandler(dockerManager);
+  codeEditingCommandHandler.registerTo(commandBus);
+
   // const searchRes = await commandBus.execute("SEARCH_GOOGLE", ['top italian dishes'])
   // console.log(searchRes)
 
   // const res = await commandBus.execute("SUMMARIES_WEBSITE", ['https://www.countryliving.com/uk/travel-ideas/staycation-uk/a29510524/uk-holiday-destinations', 'What are the most popular UK summer holiday destinations?'])
   // console.log(res)
 
-  const ws = new WebSummariser(openAiManager)
-  console.log(await ws.getSummary('https://www.countryliving.com/uk/travel-ideas/staycation-uk/a29510524/uk-holiday-destinations', "What are the most popular UK summer holiday destinations?"))
+  // const ws = new WebSummariser(openAiManager)
+  // console.log(await ws.getSummary('https://www.countryliving.com/uk/travel-ideas/staycation-uk/a29510524/uk-holiday-destinations', "What are the most popular UK summer holiday destinations?"))
   // console.log(await ws.getSummary('https://en.wikipedia.org/wiki/Nikola_Tesla', ""))
   // console.log(await ws.getSummary('https://www.auburn.edu/~vestmon/robotics.html', ""))
   // console.log(await ws.getSummary('https://en.wikipedia.org/wiki/Three_Laws_of_Robotics', "What are the three laws of robotics?"))
@@ -60,6 +64,18 @@ const main = async () => {
   // console.log(await ws.getSummary('https://floodgate.games/products/3-laws-of-robotics', ""))
   // console.log(await ws.getSummary('https://boardgamegeek.com/boardgame/271447/3-laws-robotics', ""))
   // console.log(await ws.getSummary('https://papers.ssrn.com/sol3/papers.cfm?abstract_id=289', ""))
+  
+  await commandBus.execute('DELETE_FILE', ['testfile.py']);
+  await commandBus.execute('MAKE_FILE', ['testfile.py']);
+  await commandBus.execute('WRITE_TO_FILE', [
+    'testfile.py',
+    'line1\nline2\nline3\nline4\nline5',
+  ]);
+  await commandBus.execute("READ_FILE", ['testfile.py']);
+  await commandBus.execute('REMOVE_LINES', ['testfile.py', '2', '3']);
+  const res = await commandBus.execute('READ_FILE', ['testfile.py']);
+  console.log(res)
+
 };
 
 main();

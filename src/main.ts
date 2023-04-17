@@ -8,6 +8,7 @@ import { v4 as uuid } from 'uuid'
 import Logger from './utils/Logger';
 import { Memory } from './memory/Memory';
 import { ResearchCommandHandler } from './commands/ResearchCommandHandler';
+import { CodeEditingCommandHandler}  from './commands/CodeEditingCommandHandler'
 
 dotenv.config();
 
@@ -20,25 +21,25 @@ const main = async () => {
     wolframAlphaAppId: process.env.WOLFRAM_ALPHA_APP_ID as string,
   }
 
-  // const agentConfig: AgentConfig = {
-  //   agentId: uuid(),
-  //   directive: 'You are a AGI programming machine',
-  //   goals: [
-  //     '- Make a calculator app in python, that can add, subtract, multiply, and divide',
-  //     '- validate the program can run',
-  //     '- write tests to make sure it works',
-  //   ]
-  // }
-
   const agentConfig: AgentConfig = {
     agentId: uuid(),
-    directive: 'You are a AGI research analyst designed to research information and synthesise it into a report',
+    directive: 'You are a AGI programming machine',
     goals: [
-      '- research the most populat destinations for a holiday in the UK in summer',
-      '- generate a travel itenerary proposal',
-      '- save the plan in a text file',
+      'Make a calculator app in python, that can add, subtract, multiply, and divide',
+      'validate the program can run',
+      'write tests to make sure it works',
     ]
   }
+
+  // const agentConfig: AgentConfig = {
+  //   agentId: uuid(),
+  //   directive: 'You are a AGI research analyst designed to research information and synthesise it into a report',
+  //   goals: [
+  //     '- research the most populat destinations for a holiday in the UK in summer',
+  //     '- generate a travel itenerary proposal',
+  //     '- save the plan in a text file',
+  //   ]
+  // }
 
   // Set up logging
   const logger = new Logger(agentConfig.agentId);
@@ -66,12 +67,15 @@ const main = async () => {
   )
   researchCommandHandler.registerTo(commandBus)
 
+  const codeEditingCommandHandler = new CodeEditingCommandHandler(dockerManager)
+  codeEditingCommandHandler.registerTo(commandBus)
+
   // Instantiate agent
   const memory = new Memory(logger)
   const agent = new Agent(agentConfig, commandBus, openAiManager, memory)
 
   // Run agent
-  agent.run(5);
+  agent.run(0);
 };
 
 main();

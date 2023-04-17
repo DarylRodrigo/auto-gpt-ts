@@ -8,7 +8,7 @@ ROLE:
 ${directive}
 
 GOAL:
-${goals.join('\n')}
+${goals.map((goal) => `- ${goal}`).join('\n')}
 
 CONSTRAINTS:
 

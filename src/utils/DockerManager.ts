@@ -1,5 +1,5 @@
 import Docker from 'dockerode'
-import { Duplex } from 'stream'
+import { Duplex, PassThrough } from 'stream';
 import { TextDecoder } from 'text-encoding-utf-8'
 
 
@@ -42,17 +42,18 @@ export class DockerManager {
             if (err) {
               return reject(err)
             }
-  
-            if(!stdoutStream) {
+          
+            if (!stdoutStream) {
               return reject(new Error('Failed to create stdout stream'))
             }
-  
+          
             let output = ''
-            stdoutStream.on('data', (chunk) => {
+            const processedStream = this.processDockerStream(stdoutStream)
+            processedStream.on('data', (chunk) => {
               output += chunk
             });
-  
-            stdoutStream.on('end', () => {
+          
+            processedStream.on('end', () => {
               const message = new TextDecoder('utf-8').decode(Buffer.from(output, 'binary'));
               resolve(message);
             });
@@ -60,6 +61,18 @@ export class DockerManager {
         }
       )
     })
+  }
+
+  private processDockerStream(stream: Duplex): PassThrough {
+    const outputStream = new PassThrough();
+    stream.on('data', (chunk) => {
+      const payload = chunk.slice(8);
+      outputStream.write(payload);
+    });
+    stream.on('end', () => {
+      outputStream.end();
+    });
+    return outputStream;
   }
 
   private async connectToPythonContainer(containerName: string) {
