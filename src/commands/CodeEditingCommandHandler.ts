@@ -34,7 +34,7 @@ export class CodeEditingCommandHandler {
   registerTo(commandBus: CommandBus) {
     commandBus.registerCommand(
       'REMOVE_LINES',
-      'Removes lines in the given range from the specified file, line numbers indexed at 0',
+      'Removes lines in the given range from the specified file, line numbers indexed at 0 - eg: ["script.py", 2, 4]',
       "['file_path', startLine, endLine]",
       async (args) => await this.removeLines(args[0], parseInt(args[1]), parseInt(args[2]))
     );
@@ -48,7 +48,7 @@ export class CodeEditingCommandHandler {
 
     commandBus.registerCommand(
       'ADD_LINES',
-      'Inserts new lines after a specific line number in the given file',
+      'Inserts new lines after a specific line number in the given file - eg: ["script.py", 2, "a = 1',
       "['file_path', lineNumber, 'newLines']",
       async (args) => await this.addLines(args[0], parseInt(args[1]), args[2])
     );

@@ -3,7 +3,7 @@ import { CommandResult } from "../infra/Commands"
 import { DockerManager } from "../utils/DockerManager"
 
 export class DockerCommandHandler {
-  constructor(private dockerManager: DockerManager) {}
+  constructor(private dockerManager: DockerManager, private generalAgent: GeneralAgent) {}
 
   async runPythonScript(args: string[]): Promise<CommandResult> {
     const res = await this.dockerManager.containerExec(["python", ...args]);
@@ -81,12 +81,12 @@ export class DockerCommandHandler {
       async (args) => await this.removeDirectory(args)
     );
   
-    commandBus.registerCommand(
-      "MAKE_FILE",
-      'Creates new file eg: ["new_file"]',
-      '["file_name"]',
-      async (args) => await this.makeFile(args)
-    );
+    // commandBus.registerCommand(
+    //   "MAKE_FILE",
+    //   'Creates new file eg: ["new_file"]',
+    //   '["file_name"]',
+    //   async (args) => await this.makeFile(args)
+    // );
   
     commandBus.registerCommand(
       "DELETE_FILE",
@@ -106,7 +106,13 @@ export class DockerCommandHandler {
       "WRITE_TO_FILE",
       'Writes content to file eg: ["file_to_write", "content"]',
       '["file_name", "content"]',
-      async (args) => await this.writeToFile(args)
+      async (args) => await this.writeToFile(args),
+      async (args) => {
+        const systemPrompt = "Can you check if the syntax of this code is correct and make sure the input command is not used. If an input command is used please replace it for command line arguments. Respond with the new code.";
+        if (args[0].includes(".py")) 
+          args[1] = await this.generalAgent.prompt(systemPrompt, args[1])
+        return args
+      }
     );
   
     commandBus.registerCommand(

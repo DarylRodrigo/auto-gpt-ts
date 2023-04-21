@@ -5,8 +5,8 @@ export class CommandBus {
 
   constructor() {}
 
-  registerCommand(name: string, instruction: string, format: string, command: (args: string[]) => Promise<CommandResult>) {
-    this.commands[name] = { cmd: command, instruction, format }
+  registerCommand(name: string, instruction: string, format: string, command: (args: string[]) => Promise<CommandResult>, correctionalPrompt?: (args: string[]) => Promise<string[]>) {
+    this.commands[name] = { cmd: command, instruction, format, correctionalPrompt }
   }
 
   generateCommandList(): string[] {
