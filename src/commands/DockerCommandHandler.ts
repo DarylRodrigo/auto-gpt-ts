@@ -6,7 +6,6 @@ export class DockerCommandHandler {
   constructor(private dockerManager: DockerManager) {}
 
   async runPythonScript(args: string[]): Promise<CommandResult> {
-    const fileName = args[0]
     const res = await this.dockerManager.containerExec(["python", ...args]);
     return { ok: true, message: res };
   }
