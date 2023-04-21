@@ -14,9 +14,7 @@ class SpawnBashCommand extends Commands {
 
   async execute(params: SpawnBashCommandFormat): Promise<{ ok: boolean; message: string | null }> {
     return new Promise((resolve, reject) => {
-      console.log(params);
       const { args } = SpawnBashCommandFormat.check(params);
-      console.log(args[0], args.slice(1));
       const process = args.length == 1 ? spawn(args[0]) : spawn(args[0], args.slice(1));
 
       const output: string[] = [];

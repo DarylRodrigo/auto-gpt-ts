@@ -45,6 +45,8 @@ const main = async () => {
   const codeEditingCommandHandler = new CodeEditingCommandHandler(dockerManager);
   codeEditingCommandHandler.registerTo(commandBus);
 
+  console.log(await dockerManager.containerExec(["python", ...`hello.py -i 1`.split(" ")]))
+
   // const searchRes = await commandBus.execute("SEARCH_GOOGLE", ['top italian dishes'])
   // console.log(searchRes)
 
@@ -65,16 +67,16 @@ const main = async () => {
   // console.log(await ws.getSummary('https://boardgamegeek.com/boardgame/271447/3-laws-robotics', ""))
   // console.log(await ws.getSummary('https://papers.ssrn.com/sol3/papers.cfm?abstract_id=289', ""))
   
-  await commandBus.execute('DELETE_FILE', ['testfile.py']);
-  await commandBus.execute('MAKE_FILE', ['testfile.py']);
-  await commandBus.execute('WRITE_TO_FILE', [
-    'testfile.py',
-    'line1\nline2\nline3\nline4\nline5',
-  ]);
-  await commandBus.execute("READ_FILE", ['testfile.py']);
-  await commandBus.execute('REMOVE_LINES', ['testfile.py', '2', '3']);
-  const res = await commandBus.execute('READ_FILE', ['testfile.py']);
-  console.log(res)
+  // await commandBus.execute('DELETE_FILE', ['testfile.py']);
+  // await commandBus.execute('MAKE_FILE', ['testfile.py']);
+  // await commandBus.execute('WRITE_TO_FILE', [
+  //   'testfile.py',
+  //   'line1\nline2\nline3\nline4\nline5',
+  // ]);
+  // await commandBus.execute("READ_FILE", ['testfile.py']);
+  // await commandBus.execute('REMOVE_LINES', ['testfile.py', '2', '3']);
+  // const res = await commandBus.execute('READ_FILE', ['testfile.py']);
+  // console.log(res)
 
 };
 
