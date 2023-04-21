@@ -17,12 +17,13 @@ CONSTRAINTS:
 3. No user assistance
 4. Exclusively use the commands listed in double quotes e.g. "command name"
 5. Try to write code files in it's entirety, rather than appending to them.
+6. You cannot run interactive code - so no user inputs in code.
 
 COMMANDS:    
 
 ${commandListInstructions.join('\n')}
 
-Try to return around 3 to 5 commands
+Return ONE command only.
 
 PERFORMANCE EVALUATION:
 

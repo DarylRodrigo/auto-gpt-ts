@@ -15,9 +15,9 @@ describe('dockerCommandHandler', () => {
   })
 
   afterEach( async () => {
-    await commandBus.execute("REMOVE_DIR", ["testDir"])
-    await commandBus.execute("DELETE_FILE", ["*.txt"])
-    await commandBus.execute("DELETE_FILE", ["*.py"])
+    // await commandBus.execute("REMOVE_DIR", ["testDir"])
+    // await commandBus.execute("DELETE_FILE", ["*.txt"])
+    // await commandBus.execute("DELETE_FILE", ["*.py"])
   })
   
   it("should list files", async () => {
@@ -82,11 +82,12 @@ describe('dockerCommandHandler', () => {
     expect(res.ok).eql(true);
   });
 
-  it("should run python", async () => {
-    await commandBus.execute("DELETE_FILE", ["hello.py"]);
+  it.only("should run python", async () => {
+    // await commandBus.execute("DELETE_FILE", ["hello.py"]);
     await commandBus.execute("WRITE_TO_FILE", ["hello.py", `print ("Hello World!")`]);
+    console.log("e")
     
-    const res = await commandBus.execute("RUN_PYTHON", ["hello.py"]);
+    const res = await commandBus.execute("RUN_PYTHON", ["hello.py", "-i", "1"]);
   
     expect(res.ok).eql(true);
     expect(res.message).to.include("Hello World!");

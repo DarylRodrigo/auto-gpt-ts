@@ -75,7 +75,7 @@ const main = async () => {
   const agent = new Agent(agentConfig, commandBus, openAiManager, memory)
 
   // Run agent
-  agent.run(0);
+  agent.run(10);
 };
 
 main();

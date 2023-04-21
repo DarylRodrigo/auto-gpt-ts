@@ -20,7 +20,7 @@ export class Memory {
   }
 
   addMemoryBlock(memoryBlock: MemoryBlock) {
-    console.log(`💭 Adding memory block: ${JSON.stringify(memoryBlock)}`)
+    // console.log(`💭 Adding memory block: ${JSON.stringify(memoryBlock)}`)
 
     this.memory.push(memoryBlock)
     this.logger.saveThought(memoryBlock)

@@ -123,7 +123,7 @@ export class Agent {
       this.memory.addMemoryBlock({ type: "COMMAND", memory: command })
     })
 
-    console.log(this.memory.shortTermMemory);
+    // console.log(this.memory.shortTermMemory);
   }
 
 }

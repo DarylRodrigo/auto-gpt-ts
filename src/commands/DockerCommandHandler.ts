@@ -6,8 +6,10 @@ export class DockerCommandHandler {
   constructor(private dockerManager: DockerManager) {}
 
   async runPythonScript(args: string[]): Promise<CommandResult> {
-    const [fileName] = args;
-    const res = await this.dockerManager.containerExec(["python", fileName]);
+    console.log(args)
+    const fileName = args[0]
+    console.log(`${fileName} ${args.slice(1).join(" ")}`)
+    const res = await this.dockerManager.containerExec(["python", `${fileName} ${args.slice(1).join(" ")}`]);
     return { ok: true, message: res };
   }
 
@@ -63,8 +65,8 @@ export class DockerCommandHandler {
   registerTo(commandBus: CommandBus) {
     commandBus.registerCommand(
       "RUN_PYTHON",
-      'runs python script eg: ["script.py"]',
-      '["script_name"]',
+      'runs python script with arguments eg: ["script.py"] or ["script.py", "-i", "1"]]',
+      '["script_name", "arg1", "arg2"]',
       async (args) => await this.runPythonScript(args)
     );
   
