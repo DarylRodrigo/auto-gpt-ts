@@ -74,7 +74,7 @@ export class WebSummariser {
       `
     }
 
-    return await this.openAiManager.chatCompletion([systemPrompt, userPromp], GptAnalysis )
+    return await this.openAiManager.chatCompletion([systemPrompt, userPromp], GptAnalysis)
   }   
 
   async getContentInMarkdown (url: string): Promise<string> {

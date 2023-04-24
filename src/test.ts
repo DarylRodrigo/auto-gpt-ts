@@ -4,8 +4,9 @@ import { CommandBus } from './infra/CommandBus';
 import dotenv from 'dotenv';
 import { DockerCommandHandler } from './commands/DockerCommandHandler';
 import { ResearchCommandHandler } from './commands/ResearchCommandHandler';
-import OpenAIManager from './utils/OpenAIManager';
+import OpenAiManager from './utils/OpenAIManager';
 import { CodeEditingCommandHandler } from './commands/CodeEditingCommandHandler';
+import { String } from 'runtypes';
 
 
 
@@ -28,12 +29,12 @@ const main = async () => {
 
 
   // Setup OpenAIManager
-  const openAiManager = new OpenAIManager(options.openAiApiKey)
+  const openAiManager = new OpenAiManager(options.openAiApiKey)
 
   // Create command bus and register commands
   const commandBus = new CommandBus()
 
-  const dockerCommandHandler = new DockerCommandHandler(dockerManager)
+  const dockerCommandHandler = new DockerCommandHandler(dockerManager, openAiManager)
   dockerCommandHandler.registerTo(commandBus)
   const researchCommandHandler = new ResearchCommandHandler(openAiManager, { 
     googleApiKey: options.googleApiKey, 
@@ -45,7 +46,7 @@ const main = async () => {
   const codeEditingCommandHandler = new CodeEditingCommandHandler(dockerManager);
   codeEditingCommandHandler.registerTo(commandBus);
 
-  console.log(await dockerManager.containerExec(["python", ...`hello.py -i 1`.split(" ")]))
+  // console.log(await dockerManager.containerExec(["python", ...`hello.py -i 1`.split(" ")]))
 
   // const searchRes = await commandBus.execute("SEARCH_GOOGLE", ['top italian dishes'])
   // console.log(searchRes)
@@ -77,7 +78,6 @@ const main = async () => {
   // await commandBus.execute('REMOVE_LINES', ['testfile.py', '2', '3']);
   // const res = await commandBus.execute('READ_FILE', ['testfile.py']);
   // console.log(res)
-
 };
 
 main();

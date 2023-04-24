@@ -44,24 +44,6 @@ describe('dockerCommandHandler', () => {
     expect(res.ok).eql(true);
   });
 
-  it("should create a file", async () => {
-    const res = await commandBus.execute("MAKE_FILE", ["testFile.txt"]);
-
-    const { message: files} = await commandBus.execute("LIST_FILES", []);
-    expect(files).to.include("testFile.txt");
-    expect(res.ok).eql(true);
-  });
-
-  it("should delete a file", async () => {
-    await commandBus.execute("MAKE_FILE", ["testFileToDelete.txt"]);
-
-    const res = await commandBus.execute("DELETE_FILE", ["testFileToDelete.txt"]);
-
-    const { message: files} = await commandBus.execute("LIST_FILES", []);
-    expect(files).to.not.include("testFileToDelete.txt");
-    expect(res.ok).eql(true);
-  });
-
   it("should write and read a file", async () => {
     await commandBus.execute("WRITE_TO_FILE", ["testFileToRead.txt", "Hello, World!"]);
     
@@ -69,6 +51,16 @@ describe('dockerCommandHandler', () => {
     
     expect(res.ok).eql(true);
     expect(res.message).to.include("Hello, World!");
+  });
+
+  it("should delete a file", async () => {
+    await commandBus.execute("WRITE_TO_FILE", ["testFileToDelete.txt", "Hello, World!"]);
+
+    const res = await commandBus.execute("DELETE_FILE", ["testFileToDelete.txt"]);
+
+    const { message: files} = await commandBus.execute("LIST_FILES", []);
+    expect(files).to.not.include("testFileToDelete.txt");
+    expect(res.ok).eql(true);
   });
 
   it("should append to a file", async () => {

@@ -1,5 +1,12 @@
 import axios, { AxiosInstance } from 'axios';
 import { Runtype } from 'runtypes';
+import { Record, String, Static } from 'runtypes';
+
+export const Prompt = Record({
+  role: String,
+  content: String,
+});
+export type Prompt = Static<typeof Prompt>;
 
 interface ChatCompletionRequest {
   model: string;
@@ -8,7 +15,7 @@ interface ChatCompletionRequest {
   n?: number;
 }
 
-interface ChatCompletionResponse {
+export interface ChatCompletionResponse {
   id: string;
   object: string;
   created: number;
@@ -41,7 +48,7 @@ class OpenAiManager {
     });
   }
 
-  async chatCompletion<T>(messages: Array<{ role: string; content: string }>, record: Runtype<T>) {
+  async chatCompletion<T>(messages: Prompt[], record: Runtype<T>) {
     const RETRIES = 3
     for (let i = 0 ; i < RETRIES ; i++) {
       try {
@@ -50,15 +57,23 @@ class OpenAiManager {
           messages: messages,
           temperature: 0.7,
         };
+
+        console.log(messages)
     
         const completion = await this.axiosInstance.post<ChatCompletionResponse>(
           'chat/completions',
           request,
         );
 
-        // Validate correct response format
         const content = completion.data.choices[0].message.content
-        return record.check(JSON.parse(content));
+
+        // If return type is string, return the content don't parse.
+        if (typeof record === typeof String) {
+          return record.check(content)
+        }        
+        
+        const verifiedContent = record.check(JSON.parse(content));
+        return verifiedContent
       } catch (e) {
         console.log("Failed to get valid JSON response from OpenAI - trying again...")
       }
@@ -66,6 +81,13 @@ class OpenAiManager {
 
     throw new Error("Failed to get valid JSON response from OpenAI")
     
+  }
+
+  static toPrompt(system: string[], user: string[]): Prompt[] {
+    return [
+      ...system.map((c) => ({ role: 'system', content: c })),
+      ...user.map((c) => ({ role: 'system', content: c })),
+    ]
   }
 }
 

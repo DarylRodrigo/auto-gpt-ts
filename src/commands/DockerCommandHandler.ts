@@ -1,9 +1,14 @@
+import OpenAiManager from "../utils/OpenAIManager";
 import { CommandBus } from "../infra/CommandBus"
 import { CommandResult } from "../infra/Commands"
 import { DockerManager } from "../utils/DockerManager"
+import { String } from 'runtypes';
 
+interface DockerCommandHandlerOptions {
+  correctCode: boolean
+}
 export class DockerCommandHandler {
-  constructor(private dockerManager: DockerManager, private generalAgent: GeneralAgent) {}
+  constructor(private dockerManager: DockerManager, private openAiManager: OpenAiManager, private options: DockerCommandHandlerOptions = { correctCode: true }) {}
 
   async runPythonScript(args: string[]): Promise<CommandResult> {
     const res = await this.dockerManager.containerExec(["python", ...args]);
@@ -19,12 +24,6 @@ export class DockerCommandHandler {
   async removeDirectory(args: string[]): Promise<CommandResult> {
     const [directoryName] = args;
     await this.dockerManager.containerExec(["rm", "-r", directoryName]);
-    return { ok: true, message: "succesfull" };
-  }
-
-  async makeFile(args: string[]): Promise<CommandResult> {
-    const [fileName] = args;
-    await this.dockerManager.containerExec(["touch", fileName]);
     return { ok: true, message: "succesfull" };
   }
 
@@ -81,13 +80,6 @@ export class DockerCommandHandler {
       async (args) => await this.removeDirectory(args)
     );
   
-    // commandBus.registerCommand(
-    //   "MAKE_FILE",
-    //   'Creates new file eg: ["new_file"]',
-    //   '["file_name"]',
-    //   async (args) => await this.makeFile(args)
-    // );
-  
     commandBus.registerCommand(
       "DELETE_FILE",
       'Deletes file eg: ["file_to_delete"]',
@@ -108,9 +100,9 @@ export class DockerCommandHandler {
       '["file_name", "content"]',
       async (args) => await this.writeToFile(args),
       async (args) => {
-        const systemPrompt = "Can you check if the syntax of this code is correct and make sure the input command is not used. If an input command is used please replace it for command line arguments. Respond with the new code.";
-        if (args[0].includes(".py")) 
-          args[1] = await this.generalAgent.prompt(systemPrompt, args[1])
+        const systemPrompt = "Can you check if the syntax of this code is correct and make sure the input command is not used. If an input command is used please replace it for command line arguments. Respond with JUST the new code.";
+        if (args[0].includes(".py") && this.options.correctCode) 
+          args[1] = await this.openAiManager.chatCompletion(OpenAiManager.toPrompt([systemPrompt], [args[0]] ), String);
         return args
       }
     );

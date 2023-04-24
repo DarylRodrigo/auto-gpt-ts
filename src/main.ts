@@ -54,7 +54,8 @@ const main = async () => {
   // Create command bus and register commands
   const commandBus = new CommandBus()
 
-  const dockerCommandHandler = new DockerCommandHandler(dockerManager)
+  const dockerCommandHandler = new DockerCommandHandler(dockerManager, openAiManager)
+
   dockerCommandHandler.registerTo(commandBus)
 
   const researchCommandHandler = new ResearchCommandHandler(
