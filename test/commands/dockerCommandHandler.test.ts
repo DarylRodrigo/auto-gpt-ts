@@ -2,10 +2,12 @@ import { expect } from "chai"
 import { DockerCommandHandler } from "../../src/commands/DockerCommandHandler"
 import { CommandBus } from "../../src/infra/CommandBus"
 import { DockerManager } from "../../src/utils/DockerManager"
+import OpenAiManager from "../../src/utils/OpenAIManager"
 
 describe('dockerCommandHandler', () => {
   const dockerManager = new DockerManager()
-  const dockerCommandHandler = new DockerCommandHandler(dockerManager)
+  const fakeOpenAiManager = new OpenAiManager("fake-keys");
+  const dockerCommandHandler = new DockerCommandHandler(dockerManager, fakeOpenAiManager)
   const commandBus = new CommandBus()
   dockerCommandHandler.registerTo(commandBus)
 

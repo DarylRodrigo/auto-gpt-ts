@@ -48,8 +48,9 @@ class OpenAiManager {
     });
   }
 
-  async chatCompletion<T>(messages: Prompt[], record: Runtype<T>) {
+  async chatCompletion<T>(messages: Prompt[], record: Runtype<T>, typeCheck = true) {
     const RETRIES = 3
+    let content = ''
     for (let i = 0 ; i < RETRIES ; i++) {
       try {
         const request: ChatCompletionRequest = {
@@ -58,28 +59,22 @@ class OpenAiManager {
           temperature: 0.7,
         };
 
-        console.log(messages)
-    
         const completion = await this.axiosInstance.post<ChatCompletionResponse>(
           'chat/completions',
           request,
         );
 
-        const content = completion.data.choices[0].message.content
-
-        // If return type is string, return the content don't parse.
-        if (typeof record === typeof String) {
-          return record.check(content)
-        }        
+        content = completion.data.choices[0].message.content
+        if (!typeCheck) return content as unknown as T
         
-        const verifiedContent = record.check(JSON.parse(content));
-        return verifiedContent
+        return record.check(JSON.parse(content))
       } catch (e) {
+        console.log(e)
         console.log("Failed to get valid JSON response from OpenAI - trying again...")
       }
     }
 
-    throw new Error("Failed to get valid JSON response from OpenAI")
+    throw new Error(`Failed to get valid JSON response from OpenAI, response ${content}`)
     
   }
 

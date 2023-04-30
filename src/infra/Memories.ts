@@ -1,4 +1,4 @@
-import { Record, Array, Static, String, Union,Literal  } from 'runtypes';
+import { Record, Array, Static, String, Union, Literal } from 'runtypes';
 import { AgentThought } from '../Agent';
 import { CommandPayload, CommandResult } from '../infra/Commands';
 
@@ -16,7 +16,7 @@ export type ReflectionMemory = Static<typeof ReflectionMemory>;
 
 export const CommandMemory = Record({
   command: CommandPayload,
-  commandResult: CommandResult,
+  commandResult: CommandResult
 });
 export type CommandMemory = Static<typeof CommandMemory>;
 

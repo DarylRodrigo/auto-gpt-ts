@@ -41,7 +41,11 @@ export class DockerCommandHandler {
 
   async writeToFile(args: string[]): Promise<CommandResult> {
     const [fileName, content] = args;
-    await this.dockerManager.containerExec(["sh", "-c", `echo '${content}' > ${fileName}`]);
+    await this.dockerManager.containerExec([
+      'sh',
+      '-c',
+      `cat > ${fileName} <<'EOF'\n${content}\nEOF`,
+    ]);
     return { ok: true, message: "succesfull" };
   }
 
@@ -100,9 +104,15 @@ export class DockerCommandHandler {
       '["file_name", "content"]',
       async (args) => await this.writeToFile(args),
       async (args) => {
-        const systemPrompt = "Can you check if the syntax of this code is correct and make sure the input command is not used. If an input command is used please replace it for command line arguments. Respond with JUST the new code.";
+        const systemPrompt = `
+        Can you check if the syntax of this code is correct and make sure the input command is not used. 
+        - If an input command is used please replace it for command line arguments. 
+        - Make sure all functions are imported or defined before used.
+
+        Respond with JUST the new code.`
+
         if (args[0].includes(".py") && this.options.correctCode) 
-          args[1] = await this.openAiManager.chatCompletion(OpenAiManager.toPrompt([systemPrompt], [args[0]] ), String);
+          args[1] = await this.openAiManager.chatCompletion(OpenAiManager.toPrompt([systemPrompt], [args[1]] ), String, false);
         return args
       }
     );

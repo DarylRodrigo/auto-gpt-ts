@@ -6,7 +6,6 @@ import { DockerCommandHandler } from './commands/DockerCommandHandler';
 import { ResearchCommandHandler } from './commands/ResearchCommandHandler';
 import OpenAiManager from './utils/OpenAIManager';
 import { CodeEditingCommandHandler } from './commands/CodeEditingCommandHandler';
-import { String } from 'runtypes';
 
 
 
@@ -78,6 +77,56 @@ const main = async () => {
   // await commandBus.execute('REMOVE_LINES', ['testfile.py', '2', '3']);
   // const res = await commandBus.execute('READ_FILE', ['testfile.py']);
   // console.log(res)
+
+  function escapeQuotesAndBackslashes(input: string): string {
+    return input
+      .replace(/\\/g, '\\\\') // Escape backslashes
+      .replace(/'/g, "\\'") // Escape single quotes
+      .replace(/"/g, '\\"'); // Escape double quotes
+  }
+
+  const code = 'def test_evaluate_expression():\n' +
+  "    assert evaluate_expression('2+2') == 4\n" +
+  "    assert evaluate_expression('10*5') == 50\n" +
+  "    assert evaluate_expression('100-50') == 50\n" +
+  "    assert evaluate_expression('20/2') == 10\n" +
+  '\n' +
+  'def test_add():\n' +
+  '    assert add(2, 2) == 4\n' +
+  '    assert add(-2, -2) == -4\n' +
+  '    assert add(-2, 2) == 0\n' +
+  '\n' +
+  'def test_subtract():\n' +
+  '    assert subtract(2, 2) == 0\n' +
+  '    assert subtract(-2, -2) == 0\n' +
+  '    assert subtract(-2, 2) == -4\n' +
+  '\n' +
+  'def test_multiply():\n' +
+  '    assert multiply(2, 2) == 4\n' +
+  '    assert multiply(-2, -2) == 4\n' +
+  '    assert multiply(-2, 2) == -4\n' +
+  '\n' +
+  'def test_divide():\n' +
+  '    assert divide(2, 2) == 1\n' +
+  '    assert divide(-2, -2) == 1\n' +
+  '    assert divide(-2, 2) == -1\n' +
+  '\n' +
+  "if __name__ == '__main__':\n" +
+  '    test_evaluate_expression()\n' +
+  '    test_add()\n' +
+  '    test_subtract()\n' +
+  '    test_multiply()\n' +
+  '    test_divide()'
+
+  console.log( `echo '${escapeQuotesAndBackslashes(code)}' > input_test.py`)
+
+  // const escapedCode = dockerManager.escapeQuotesAndBackslashes(code);
+  await dockerManager.containerExec([
+    'sh',
+    '-c',
+    `cat > input_test.py <<'EOF'\n${code}\nEOF`,
+  ]);
+
 };
 
 main();

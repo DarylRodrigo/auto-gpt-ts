@@ -1,7 +1,5 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import * as yaml from 'js-yaml'
-import { MemoryBlock } from "../infra/Memories"
 
 class Logger {
   private logPath: string
@@ -13,10 +11,9 @@ class Logger {
     }
   }
 
-  saveThought(thought: MemoryBlock): void {
-    const memoryYaml = yaml.dump(thought)
+  saveThought(thought: string): void {
     const filePath = path.join(this.logPath, 'memory.yaml')
-    fs.writeFileSync(filePath, memoryYaml, { encoding: 'utf-8' })
+    fs.writeFileSync(filePath, `${thought} \n\n`, { encoding: 'utf-8' })
   }
 
   log(msg: string): void {

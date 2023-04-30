@@ -40,6 +40,7 @@ export class DockerManager {
   
           exec.start({}, (err: Error | null, stdoutStream: Duplex | undefined) => {
             if (err) {
+              console.log(err)
               return reject(err)
             }
           

@@ -9,16 +9,26 @@ export class CommandBus {
     this.commands[name] = { cmd: command, instruction, format, correctionalPrompt }
   }
 
-  generateCommandList(): string[] {
-    return Object.keys(this.commands).map((commandName) => {
-      const { instruction, format } = this.commands[commandName]
-      return `${commandName} args: ${format} - ${instruction}`
-    })
+  generateCommandList(enabledSkills: string[]): string[] {
+    return Object.keys(this.commands)
+      .filter((commandName) => enabledSkills.includes(commandName))
+      .map((commandName) => {
+        const { instruction, format } = this.commands[commandName]
+        return `${commandName} args: ${format} - ${instruction}`
+      })
   }
 
   async execute(commandName: string, args: string[]) {
+    if (commandName === 'FINISHED') {
+      console.log("👋🏼  Objective completed - Goodbye!")
+      process.exit(-1);
+    }
+
     const now = new Date()
-    const { cmd } = this.commands[commandName];
+    const { cmd, correctionalPrompt } = this.commands[commandName];
+    if (correctionalPrompt)
+      args = await correctionalPrompt(args);
+
     const commandResult = await cmd(args) as CommandResult;
     
     return { ...commandResult, executedAt: `${now.toLocaleDateString()} ${now.toLocaleTimeString()}` }
