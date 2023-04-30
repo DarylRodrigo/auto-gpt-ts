@@ -1,11 +1,11 @@
 import { Record, Static, String, Array } from 'runtypes';
 import { generateGuidingPrompt } from './config';
 
-import { Memory } from './memory/Memory';
 // import { CorrectCommandAgent } from './GPTAgents/Agents';
 import { CommandBus } from './infra/CommandBus';
-import { CommandPayload } from './infra/Commands';
+import { CommandPayload, CommandResult } from './infra/Commands';
 import OpenAiManager from './utils/OpenAIManager';
+import { EnhancedMemory } from './memory/EnhancedMemory';
 const prompt = require('prompt-sync')();
 
 export const AgentThought = Record({
@@ -19,7 +19,7 @@ export type AgentThought = Static<typeof AgentThought>;
 
 export const AgentResponse = Record({
   thoughts: AgentThought,
-  commands: Array(CommandPayload),
+  command: CommandPayload,
 });
 export type AgentResponse = Static<typeof AgentResponse>;
 
@@ -27,6 +27,7 @@ export interface AgentConfig {
   agentId: string,
   directive: string,
   goals: string[],
+  enabledSkills: string[]
 }
 
 export class Agent {
@@ -35,24 +36,31 @@ export class Agent {
     private config: AgentConfig,
     private commandBus: CommandBus,
     private openai: OpenAiManager,
-    private memory: Memory
+    private memory: EnhancedMemory
   ) {
     this.guidingPrompt = generateGuidingPrompt(
       this.config.directive,
       this.config.goals,
-      this.commandBus.generateCommandList(),
+      this.commandBus.generateCommandList(config.enabledSkills),
     );
 
     console.log(`✨ Directive: ${this.config.directive}`)
     console.log(`\n🎯 Goals: \n${this.config.goals.map((goal) => `- ${goal}`).join('\n')}`)
-    console.log(`\n🛠 Registered Commands:\n${this.commandBus.generateCommandList().map(cmd => `-${cmd}`).join('\n')} \n\n`)
+    console.log(`\n🛠 Registered Commands:\n${this.commandBus.generateCommandList(config.enabledSkills).map(cmd => `-${cmd}`).join('\n')} \n\n`)
   }
 
   async run(numLoops = 10, options = { permissions: true }) {
     for (let i = 0; i < numLoops; i++) {
-      const { thoughts, commands } = await this.think();
+      
+      // Generate thoughts
+      const { thoughts, command } = await this.think();
       if (options.permissions && prompt('continue with action?') !== 'y') process.exit(-1);
-      await this.act(thoughts, commands);
+      
+      // Execute command
+      const commandResult = await this.act(command);
+
+      // Add thoughts and command to memory
+      await this.memory.addMemoryBlock(thoughts, { command, commandResult })
     }
   };
 
@@ -60,8 +68,9 @@ export class Agent {
     console.log("============= 🧠 T H I N K I N G 🧠 =============")
     console.log("===> Memories Added")
     console.log(this.memory.shortTermMemory)
+    console.log("===================")
 
-    const { thoughts, commands } = await this.openai.chatCompletion([
+    const { thoughts, command } = await this.openai.chatCompletion([
       {
         role: 'system',
         content: this.guidingPrompt,
@@ -80,50 +89,20 @@ export class Agent {
     console.log("===> Thoughts Returned")
     console.log(thoughts)
     console.log("===> Commands Returned")
-    console.log(commands)
+    console.log(command)
     
+    return {
+      thoughts,
+      command,
+    };
 
-    try {
-      // Commands sometimes are not in the correctly interperated so have agent correct them.
-      const promises = commands.map(async (commandPayload: unknown): Promise<CommandPayload> => {
-        if (CommandPayload.validate(commandPayload).success) {
-          return commandPayload as CommandPayload;
-        }
-
-        // console.log(`Incorrect command format: ${commandPayload}`);
-        // const corrections = await this.correctCommandAgent.execute(commandPayload, this.commands);
-        // return corrections.command;
-        return commandPayload as CommandPayload;
-      });
-
-      // Return thoughts and corrected commands
-      return {
-        thoughts,
-        commands: await Promise.all(promises),
-      };
-    } catch (err) {
-      throw new Error('Error parsing agent response');
-    }
   }
 
-  async act(thoughts: AgentThought, commandPayloads: CommandPayload[]) {
-    const commandHistory = [];
+  async act(commandPayload: CommandPayload): Promise<CommandResult> {
+    const { name: commandName, args } = commandPayload;
+    console.log(`executing command: ${commandName} \n\n with args: ${args.join("\n")}`);
 
-    for (const commandPayload of commandPayloads) {
-      const { name: commandName, args } = commandPayload;
-      
-      console.log(`executing command: ${commandName} with args: ${args}`);
-      const commandResult = await this.commandBus.execute(commandName, args);
-      commandHistory.push({ command: commandPayload, commandResult });
-    }
-
-    // commit thoughts and commands to memory
-    this.memory.addMemoryBlock({ type: "THOUGHT", memory: { thoughts, actions: commandPayloads }})
-    commandHistory.forEach((command) => {
-      this.memory.addMemoryBlock({ type: "COMMAND", memory: command })
-    })
-
-    // console.log(this.memory.shortTermMemory);
+    return await this.commandBus.execute(commandName, args);
   }
 
 }

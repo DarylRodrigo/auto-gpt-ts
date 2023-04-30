@@ -3,10 +3,12 @@ import { CommandBus } from '../../src/infra/CommandBus';
 import { DockerCommandHandler } from '../../src/commands/DockerCommandHandler';
 import { DockerManager } from '../../src/utils/DockerManager';
 import { CodeEditingCommandHandler } from '../../src/commands/CodeEditingCommandHandler';
+import OpenAiManager from '../../src/utils/OpenAIManager';
 
 describe('CodeEditingHandler', () => {
   const dockerManager = new DockerManager();
-  const dockerCommandHandler = new DockerCommandHandler(dockerManager);
+  const openAiManager = new OpenAiManager("fake-keys");
+  const dockerCommandHandler = new DockerCommandHandler(dockerManager, openAiManager, { correctCode: false });
   const codeEditingCommandHandler = new CodeEditingCommandHandler(dockerManager);
   const commandBus = new CommandBus();
 
@@ -17,7 +19,6 @@ describe('CodeEditingHandler', () => {
     await dockerManager.setup()
 
     await commandBus.execute('DELETE_FILE', ['testfile.py']);
-    await commandBus.execute('MAKE_FILE', ['testfile.py']);
     await commandBus.execute('WRITE_TO_FILE', [
       'testfile.py',
       'line1\nline2\nline3\nline4\nline5',

@@ -6,9 +6,9 @@ import { DockerCommandHandler } from './commands/DockerCommandHandler';
 import OpenAiManager from './utils/OpenAIManager';
 import { v4 as uuid } from 'uuid'
 import Logger from './utils/Logger';
-import { Memory } from './memory/Memory';
-import { ResearchCommandHandler } from './commands/ResearchCommandHandler';
 import { CodeEditingCommandHandler}  from './commands/CodeEditingCommandHandler'
+import { EnhancedMemory } from './memory/EnhancedMemory';
+import { ResearchCommandHandler } from './commands/ResearchCommandHandler';
 
 dotenv.config();
 
@@ -19,16 +19,22 @@ const main = async () => {
     googleApiKey: process.env.GOOGLE_API_KEY as string,
     googleSearchEngineId: process.env.GOOGLE_SEARCH_ENGINE_ID as string,
     wolframAlphaAppId: process.env.WOLFRAM_ALPHA_APP_ID as string,
+    pinecone: {
+      apiKey: process.env.PINECONE_API_KEY as string,
+      environment: process.env.PINECONE_ENVIRONMENT as string,
+      index:process.env.PINECONE_INDEX as string
+    }
   }
 
   const agentConfig: AgentConfig = {
     agentId: uuid(),
-    directive: 'You are a AGI programming machine',
+    directive: 'You are a AGI programming machine designed to write effective, short code that functions.',
     goals: [
       'Make a calculator app in python, that can add, subtract, multiply, and divide',
       'validate the program can run',
       'write tests to make sure it works',
-    ]
+    ],
+    enabledSkills: ['WRITE_TO_FILE', 'APPEND_FILE', 'RUN_PYTHON', 'REPLACE_LINE', 'ADD_LINES'],
   }
 
   // const agentConfig: AgentConfig = {
@@ -53,10 +59,8 @@ const main = async () => {
 
   // Create command bus and register commands
   const commandBus = new CommandBus()
-
-  const dockerCommandHandler = new DockerCommandHandler(dockerManager)
+  const dockerCommandHandler = new DockerCommandHandler(dockerManager, openAiManager)
   dockerCommandHandler.registerTo(commandBus)
-
   const researchCommandHandler = new ResearchCommandHandler(
     openAiManager, 
     { 
@@ -66,12 +70,12 @@ const main = async () => {
     }
   )
   researchCommandHandler.registerTo(commandBus)
-
   const codeEditingCommandHandler = new CodeEditingCommandHandler(dockerManager)
   codeEditingCommandHandler.registerTo(commandBus)
 
   // Instantiate agent
-  const memory = new Memory(logger)
+  const memory = new EnhancedMemory(logger, { ...options.pinecone, openAIApiKey: options.openAiApiKey }, openAiManager)
+  memory.setup()
   const agent = new Agent(agentConfig, commandBus, openAiManager, memory)
 
   // Run agent
