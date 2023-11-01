@@ -33,3 +33,5 @@ ts-node src/main.ts
 I wrote a blog post about how I designed the system and my findings [here](https://darylrodrigo.notion.site/Building-a-Typescript-Version-of-Auto-GPT-Implementation-and-Findings-3a4d30fc6e8c48329ad03ab3f7a4aeed). The interesting take aways were:
 - With the modularity in it's design it allowed GPT-4 to fully generate its own capabilities.
 - Inbuilt command correction allowed for much better performance.
+
+- test
